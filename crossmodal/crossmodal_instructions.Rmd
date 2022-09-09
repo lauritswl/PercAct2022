@@ -1,6 +1,6 @@
 ---
 title: "Crossmodal - instruction file"
-author: "Laura Bock Paulsen"
+author: "Laurits Wieslander Lyngbæk"
 date: "9/9/2022"
 output: html_document
 ---
@@ -33,7 +33,10 @@ First of all, you need to download the data from the Google drive folder: **http
 ### Load data
 Load in the data.
 ```{r}
+#Read in csv's and combine into two DF's
 
+aud <- read_bulk(directory = "./data_aud/")
+vis <- read_bulk(directory = "./data_vis/")
 ```
 
 Hint: you can use read_bulk() from the readbulk package to load the different csv files into one dataframe (one df for vision, one for audition). 
@@ -50,14 +53,21 @@ To begin with try to get an overview of the data by answering the following ques
 
 What variables do we have? 
 ```{r}
-
+head(aud)
+head(vis)
 ```
 
 Which variables are we interested in? 
 
 Are the variables in the right format (e.g., factor, numeric)? If they are not, make sure they are.
 ```{r}
+select_func <- function(df_name){
+  df_name <- df_name %>% 
+    select(rt,congruency,subject,accuracy)
+  return(df_name)}
 
+aud <- select_func(aud)
+vis <- select_func(vis)
 ```
 
 How many participants do we have in each condition?
