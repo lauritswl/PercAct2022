@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
-pacman::p_load(tidyverse, readbulk, patchwork, lmerTest)
+pacman::p_load(tidyverse, readbulk, patchwork, lmerTest, ggplot2, Hmisc, gridExtra)
 ```
 
 For this class, the aim is to investigate some cross modal effects. This will be done using the data from the experiment you **hopefully** completed before today's class.
@@ -72,13 +72,23 @@ vis <- select_func(vis)
 
 How many participants do we have in each condition?
 ```{r}
-
+count_func <- function(df_name){
+  df_name <- df_name %>% 
+    group_by(subject) %>% 
+    summarise()
+  return(df_name)}
+count_func(aud)
+count_func(vis)
 ```
 
 
 Create new dataframes that only contains the correct trials. The dataframes with both correct and incorrect trials will be used in the last part of the exercise, so do not overwrite this. 
 ```{r}
+correct_aud <- aud %>% 
+  filter(accuracy == "true")
 
+correct_vis <- vis %>% 
+  filter(accuracy == "true")
 ```
 
 
@@ -86,11 +96,32 @@ Create new dataframes that only contains the correct trials. The dataframes with
 To further look into the data, lets make a quick plot! More specifically, make a plot of the mean reaction time per concurrency. Make sure to include errorbars. 
 
 ```{r}
+p1_aud<- correct_aud%>%
+  ggplot(aes(x = congruency, y = rt, fill = congruency)) +
+  geom_boxplot() +
+  ylim(0, 1500) +
+  stat_summary(fun.data = mean_cl_normal, geom = "errorbar", color = 'black', width = 0.1)+
+  labs(title="Auditory", x="Congruency", y = "Reaction Time")+
+  theme_classic() +
+  scale_fill_manual(values=c('#999999','#E69F00'))
 
+p1_vis <- correct_vis%>%
+  ggplot(aes(x = congruency, y = rt, fill = congruency)) +
+  geom_boxplot() +
+  ylim(0, 1500) +
+  stat_summary(fun.data = mean_cl_normal, geom = "errorbar", color = 'black', width = 0.1)+
+  labs(title="Visual", x="Congruency", y = "Reaction Time")+
+  theme_classic() +
+  scale_fill_manual(values=c('#999999','#E69F00'))
+
+grid.arrange(p1_aud, p1_vis, ncol=2)
 ```
 
 ### Discussion
 Interpret the findings. Do they match your predictions? Why? Why not? 
+
+
+
 
 
 # Investigate if congruency predicts reaction time using a linear model
@@ -98,7 +129,10 @@ Does congruency predict the reaction time? Lets find out.
 
 To do this, make a simple linear model. 
 ```{r}
-
+model_aud <- lmerTest::lmer(rt~congruency+(1|subject), data = correct_aud, REML = F)
+summary(model_aud)
+model_vis <- lmerTest::lmer(rt~congruency+(1|subject), data = correct_vis, REML = F)
+summary(model_vis)
 ```
 
 ### Report the results
